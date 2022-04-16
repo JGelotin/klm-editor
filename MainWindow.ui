@@ -26,7 +26,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="createNewButton">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -39,7 +39,7 @@
      <string>Create New</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="openButton">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -52,7 +52,7 @@
      <string>Open</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="writeButton">
     <property name="geometry">
      <rect>
       <x>330</x>
@@ -65,7 +65,7 @@
      <string>Write </string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="saveButton">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -78,29 +78,6 @@
      <string>Save</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tableWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>150</y>
-      <width>781</width>
-      <height>391</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QScrollBar" name="verticalScrollBar">
-    <property name="geometry">
-     <rect>
-      <x>770</x>
-      <y>151</y>
-      <width>20</width>
-      <height>389</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
@@ -111,7 +88,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="filterButton">
     <property name="geometry">
      <rect>
       <x>670</x>
@@ -150,7 +127,7 @@
      <enum>Qt::Vertical</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_6">
+   <widget class="QPushButton" name="exitButton">
     <property name="geometry">
      <rect>
       <x>650</x>
@@ -161,6 +138,16 @@
     </property>
     <property name="text">
      <string>Exit</string>
+    </property>
+   </widget>
+   <widget class="QTableView" name="tableView">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>781</width>
+      <height>391</height>
+     </rect>
     </property>
    </widget>
   </widget>
