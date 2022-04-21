@@ -32,6 +32,8 @@ class MainWindow(QMainWindow):
         self.exitButton.clicked.connect(self.close)
         self.filterButton.clicked.connect(self.filter_table)
         self.queryButton.clicked.connect(self.execute_query)
+
+        self.databaseTableComboBox.currentIndexChanged.connect(self.select_table)
         
     def open_file_dialog(self):
         filename = QFileDialog.getOpenFileName(filter="CSV File (*.csv);;Database File (*.db)")
@@ -80,9 +82,25 @@ class MainWindow(QMainWindow):
                     # First table in database is open and displayed by default
                     statement = "SELECT * FROM " + self.db.tables()[0]
                     query = QSqlQuery(statement)
+                    self.populate_combobox(self.db)
                     self.model.setQuery(query)
 
                     self.tableView.setModel(self.model)
+
+    def populate_combobox(self, db):
+        if type(self.model) == type(QSqlTableModel()):
+            for x in range(0, len(db.tables())):
+                self.databaseTableComboBox.addItem(db.tables()[x])
+
+    def select_table(self):
+        current_index = self.databaseTableComboBox.current_index()
+
+        if type(self.model) == type(QSqlTableModel()):
+            # Default index of a QComboBox widget is -1
+            # Set conditional so that it's not automatically called when filled
+            if current_index != -1:
+                statement = "SELECT * FROM " + self.db.tables()[current_index]
+                self.execute_query(statement)
 
     def execute_query(self):
         if type(self.model) == type(QSqlTableModel()):
