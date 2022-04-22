@@ -32,8 +32,18 @@ class MainWindow(QMainWindow):
         self.exitButton.clicked.connect(self.close)
         self.filterButton.clicked.connect(self.filter_table)
         self.queryButton.clicked.connect(self.execute_query)
+        self.resetButton.clicked.connect(self.reset_table)
 
+        # Combo Box Functions
         self.databaseTableComboBox.currentIndexChanged.connect(self.select_table)
+
+        # Menu Bar Action Functions
+        self.csvImportMenuAction.triggered.connect(self.open_file_dialog)
+        self.dbImportMenuAction.triggered.connect(self.open_file_dialog)
+        self.exitMenuAction.triggered.connect(self.close)
+
+        # ADD:
+        # self.saveMenuAction.triggered.connect()
         
     def open_file_dialog(self):
         filename = QFileDialog.getOpenFileName(filter="CSV File (*.csv);;Database File (*.db)")
@@ -50,6 +60,7 @@ class MainWindow(QMainWindow):
                     self.queryButton.setVisible(False)
                     self.databaseTableComboBox.setVisible(False)
                     self.inputLine.setGeometry(10, 100, 581, 41)
+                    self.inputLine.clear()
 
                     # Load data from csv file into a list to be added to the model
                     reader = csv.reader(f)
@@ -72,6 +83,7 @@ class MainWindow(QMainWindow):
                 self.queryButton.setVisible(True)
                 self.databaseTableComboBox.setVisible(True)
                 self.inputLine.setGeometry(150, 100, 441, 41)
+                self.inputLine.clear()
 
                 self.db = QSqlDatabase.addDatabase("QSQLITE")
                 self.db.setDatabaseName(file_name + file_extension)
@@ -101,6 +113,14 @@ class MainWindow(QMainWindow):
             if current_index != -1:
                 statement = "SELECT * FROM " + self.db.tables()[current_index]
                 self.execute_query(statement)
+
+    def reset_table(self):
+        if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
+            self.filter_proxy_model.setFilterKeyColumn(-1) # -1 selects all columns
+            self.filter_proxy_model.setFilterRegExp("")    # Empty reg expression resets model
+
+        elif type(self.model) == type(QSqlTableModel()):
+            self.select_table()
 
     def execute_query(self):
         if type(self.model) == type(QSqlTableModel()):
