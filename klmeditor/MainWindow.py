@@ -150,28 +150,65 @@ class MainWindow(QMainWindow):
 
     def export_model_to_csv(self, file_name, file_extension):
         if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
-            all_data = []
+            data = []
             row = []
 
+            row_count = self.model.rowCount()
+            column_count = self.model.columnCount()
+
             # Appending header row of the table
-            for x in range(0, self.model.columnCount()):
+            for x in range(0, column_count):
                 row.append(self.model.horizontalHeaderItem(x).text())
             
-            all_data.append(row)
+            data.append(row)
             row = []
 
             # Appending rest of the data rows in the table
-            for x in range(0, self.model.rowCount()):
-                for y in range(0, self.model.columnCount()):
+            for x in range(0, row_count):
+                for y in range(0, column_count):
                     row.append(self.model.item(x,y).text())
                 
-                all_data.append(row)
+                data.append(row)
                 row = []
 
             # Writing the nested list of data to a .csv spreadsheet
             with open(file_name + file_extension, 'w', newline='', encoding='utf-8') as f:
                 wr = csv.writer(f)
-                wr.writerows(all_data)
+                wr.writerows(data)
+        
+        elif type(self.model) == type(QSqlTableModel()):
+            # Each table will be exported to its own csv file
+            for table_num in range(0, len(self.db.tables())):
+                data = []
+                row = []
+
+                row_count = self.model.rowCount()
+                column_count = self.model.columnCount()
+
+                table_name = self.db.tables()[table_num]
+
+                query = QSqlQuery("SELECT * FROM " + self.db.tables()[table_num])
+                self.model.setQuery(query)
+
+                # Header
+                for x in range(0, column_count):
+                    row.append(self.model.headerData(x, QtCore.Qt.Horizontal))
+
+                data.append(row)
+                row = []
+
+                # Data
+                for x in range(0, row_count):
+                    for y in range(0, column_count):
+                        row.append(self.model.record(x).value(y))
+
+                    data.append(row)
+                    row = []
+
+                # Saving current table to .csv
+                with open(file_name + "_" + table_name + file_extension, 'w', newline='', encoding='utf-8') as f:
+                    wr = csv.writer(f)
+                    wr.writerows(data) 
 
     def filter_table(self):
         # Split into: column name and filter value
