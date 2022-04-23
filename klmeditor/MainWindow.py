@@ -84,6 +84,9 @@ class MainWindow(QMainWindow):
                 self.inputLine.setGeometry(150, 100, 441, 41)
                 self.inputLine.clear()
 
+                if self.db != None:
+                    self.db.close()
+
                 self.db = QSqlDatabase.addDatabase("QSQLITE")
                 self.db.setDatabaseName(file_name + file_extension)
 
@@ -97,6 +100,14 @@ class MainWindow(QMainWindow):
                     self.model.setQuery(query)
 
                     self.tableView.setModel(self.model)
+
+                else:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Critical)
+                    msg.setText("Connection to database failed.")
+                    msg.setInformativeText("Please try again.")
+                    msg.setWindowTitle("Error")
+                    msg.exec_()
 
     def populate_combobox(self, db):
         if type(self.model) == type(QSqlTableModel()):
@@ -177,6 +188,10 @@ class MainWindow(QMainWindow):
                 wr.writerows(data)
         
         elif type(self.model) == type(QSqlTableModel()):
+            # The query shown in the Table View will be lost during the process of saving
+            # Saving the original query will allow for the table to keep its original state after saving
+            original_query = self.model.query()
+
             # Each table will be exported to its own csv file
             for table_num in range(0, len(self.db.tables())):
                 data = []
@@ -209,6 +224,9 @@ class MainWindow(QMainWindow):
                 with open(file_name + "_" + table_name + file_extension, 'w', newline='', encoding='utf-8') as f:
                     wr = csv.writer(f)
                     wr.writerows(data) 
+
+            # Display the query that was shown before saving
+            self.model.setQuery(original_query)
 
     def filter_table(self):
         # Split into: column name and filter value
