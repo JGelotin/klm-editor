@@ -145,7 +145,33 @@ class MainWindow(QMainWindow):
         file_name = split_filename[0]
         file_extension = split_filename[1]
 
-        # CREATE FUNCTION TO EXPORT TO CSV AND CONNECT HERE
+        if file_extension == ".csv":
+            self.export_model_to_csv(file_name, file_extension)
+
+    def export_model_to_csv(self, file_name, file_extension):
+        if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
+            all_data = []
+            row = []
+
+            # Appending header row of the table
+            for x in range(0, self.model.columnCount()):
+                row.append(self.model.horizontalHeaderItem(x).text())
+            
+            all_data.append(row)
+            row = []
+
+            # Appending rest of the data rows in the table
+            for x in range(0, self.model.rowCount()):
+                for y in range(0, self.model.columnCount()):
+                    row.append(self.model.item(x,y).text())
+                
+                all_data.append(row)
+                row = []
+
+            # Writing the nested list of data to a .csv spreadsheet
+            with open(file_name + file_extension, 'w', newline='', encoding='utf-8') as f:
+                wr = csv.writer(f)
+                wr.writerows(all_data)
 
     def filter_table(self):
         # Split into: column name and filter value
