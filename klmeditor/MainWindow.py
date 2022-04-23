@@ -33,6 +33,7 @@ class MainWindow(QMainWindow):
         self.filterButton.clicked.connect(self.filter_table)
         self.queryButton.clicked.connect(self.execute_query)
         self.resetButton.clicked.connect(self.reset_table)
+        self.saveButton.clicked.connect(self.save_file_dialog)
 
         # Combo Box Functions
         self.databaseTableComboBox.currentIndexChanged.connect(self.select_table)
@@ -40,10 +41,8 @@ class MainWindow(QMainWindow):
         # Menu Bar Action Functions
         self.csvImportMenuAction.triggered.connect(self.open_file_dialog)
         self.dbImportMenuAction.triggered.connect(self.open_file_dialog)
+        self.saveMenuAction.triggered.connect(self.save_file_dialog)
         self.exitMenuAction.triggered.connect(self.close)
-
-        # ADD:
-        # self.saveMenuAction.triggered.connect()
         
     def open_file_dialog(self):
         filename = QFileDialog.getOpenFileName(filter="CSV File (*.csv);;Database File (*.db)")
@@ -138,6 +137,15 @@ class MainWindow(QMainWindow):
             for y in range(0, len(data[x])):
                 item = QtGui.QStandardItem(data[x][y])
                 self.model.setItem(x, y, item)
+
+    def save_file_dialog(self):
+        filename = QFileDialog.getSaveFileName(filter="CSV File (*.csv);")
+        split_filename = os.path.splitext(filename[0])
+
+        file_name = split_filename[0]
+        file_extension = split_filename[1]
+
+        # CREATE FUNCTION TO EXPORT TO CSV AND CONNECT HERE
 
     def filter_table(self):
         # Split into: column name and filter value
