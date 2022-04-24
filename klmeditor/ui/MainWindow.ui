@@ -225,8 +225,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="csvImportMenuAction"/>
-    <addaction name="dbImportMenuAction"/>
+    <addaction name="importAction"/>
     <addaction name="separator"/>
     <addaction name="saveMenuAction"/>
     <addaction name="exitMenuAction"/>
@@ -234,9 +233,9 @@
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="csvImportMenuAction">
+  <action name="importAction">
    <property name="text">
-    <string>Import .csv</string>
+    <string>Import</string>
    </property>
   </action>
   <action name="dbImportMenuAction">
