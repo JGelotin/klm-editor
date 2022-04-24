@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
         self.openButton.clicked.connect(self.open_file_dialog)
         self.exitButton.clicked.connect(self.close)
         self.filterButton.clicked.connect(self.filter_table)
-        self.queryButton.clicked.connect(self.execute_query)
+        self.queryButton.clicked.connect(self.execute_query_from_input_line)
         self.resetButton.clicked.connect(self.reset_table)
         self.saveButton.clicked.connect(self.save_file_dialog)
 
@@ -39,11 +39,10 @@ class MainWindow(QMainWindow):
         self.databaseTableComboBox.currentIndexChanged.connect(self.select_table)
 
         # Menu Bar Action Functions
-        self.csvImportMenuAction.triggered.connect(self.open_file_dialog)
-        self.dbImportMenuAction.triggered.connect(self.open_file_dialog)
+        self.importAction.triggered.connect(self.open_file_dialog)
         self.saveMenuAction.triggered.connect(self.save_file_dialog)
         self.exitMenuAction.triggered.connect(self.close)
-        
+
     def open_file_dialog(self):
         filename = QFileDialog.getOpenFileName(filter="CSV File (*.csv);;Database File (*.db)")
         split_filename = os.path.splitext(filename[0])
@@ -86,12 +85,14 @@ class MainWindow(QMainWindow):
 
                 if self.db != None:
                     self.db.close()
+                    self.reset_combobox()
 
                 self.db = QSqlDatabase.addDatabase("QSQLITE")
                 self.db.setDatabaseName(file_name + file_extension)
 
                 if self.db.open():
                     self.model = QSqlTableModel()
+                    self.model.setEditStrategy()
 
                     # First table in database is open and displayed by default
                     statement = "SELECT * FROM " + self.db.tables()[0]
@@ -114,17 +115,23 @@ class MainWindow(QMainWindow):
             for x in range(0, len(db.tables())):
                 self.databaseTableComboBox.addItem(db.tables()[x])
 
+    def reset_combobox(self):
+        self.databaseTableComboBox.clear()
+
     def select_table(self):
-        current_index = self.databaseTableComboBox.current_index()
+        current_index = self.databaseTableComboBox.currentIndex()
 
         if type(self.model) == type(QSqlTableModel()):
             # Default index of a QComboBox widget is -1
             # Set conditional so that it's not automatically called when filled
-            if current_index != -1:
+            if self.databaseTableComboBox.currentIndex() != -1:
                 statement = "SELECT * FROM " + self.db.tables()[current_index]
-                self.execute_query(statement)
+                self.model.setTable(self.db.tables()[current_index])
+                self.execute_query_from_statement(statement)
 
     def reset_table(self):
+        self.inputLine.clear()
+        
         if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
             self.filter_proxy_model.setFilterKeyColumn(-1) # -1 selects all columns
             self.filter_proxy_model.setFilterRegExp("")    # Empty reg expression resets model
@@ -132,13 +139,13 @@ class MainWindow(QMainWindow):
         elif type(self.model) == type(QSqlTableModel()):
             self.select_table()
 
-    def execute_query(self):
+    def execute_query_from_input_line(self):
         if type(self.model) == type(QSqlTableModel()):
             # Executes query from input line
             query = QSqlQuery(self.inputLine.text())
             self.model.setQuery(query)
 
-    def execute_query(self, statement):
+    def execute_query_from_statement(self, statement):
         if type(self.model) == type(QSqlTableModel()):
             query = QSqlQuery(statement)
             self.model.setQuery(query)
@@ -150,7 +157,7 @@ class MainWindow(QMainWindow):
                 self.model.setItem(x, y, item)
 
     def save_file_dialog(self):
-        filename = QFileDialog.getSaveFileName(filter="CSV File (*.csv);")
+        filename = QFileDialog.getSaveFileName(filter="CSV File (*.csv);;Database File (*.db)")
         split_filename = os.path.splitext(filename[0])
 
         file_name = split_filename[0]
@@ -158,6 +165,8 @@ class MainWindow(QMainWindow):
 
         if file_extension == ".csv":
             self.export_model_to_csv(file_name, file_extension)
+        elif file_extension == ".db":
+            self.export_model_to_db(file_name, file_extension)
 
     def export_model_to_csv(self, file_name, file_extension):
         if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
