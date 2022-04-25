@@ -1,6 +1,8 @@
 import sys
 import os
 import csv
+import sqlite3
+import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
@@ -236,6 +238,55 @@ class MainWindow(QMainWindow):
 
             # Display the query that was shown before saving
             self.model.setQuery(original_query)
+
+    def export_model_to_db(self, file_name, file_extension):
+        # Similar to export_model_to_csv in retrieving information so just copied format
+        # Used both sqlite3 and pandas modules to export because sqlite3 makes it easier 
+        # to write to a database file
+        connection = sqlite3.connect(file_name + file_extension)
+
+        if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
+            headers = []
+
+            for x in range(0, self.model.columnCount()):
+                headers.append(self.model.horizontalHeaderItem(x).text())
+
+            data = []
+            row = []
+
+            for x in range(0, self.model.rowCount()):
+                for y in range(0, self.model.columnCount()):
+                    row.append(self.model.item(x,y).text())
+                
+                data.append(row)
+                row = []
+            
+            df = pd.DataFrame(data, columns = headers)
+            df.to_sql('table', connection, if_exists='replace', index=False)
+
+        elif type(self.model) == type(QSqlTableModel()):
+            for t in range(0, len(self.db.tables())):
+                headers = []
+                data = []
+                row = []
+
+                query = QSqlQuery("SELECT * FROM " + self.db.tables()[t])
+                self.model.setQuery(query)
+
+                for x in range(0, self.model.columnCount()):
+                    headers.append(self.model.headerData(x, QtCore.Qt.Horizontal))
+
+                for x in range(0, self.model.rowCount()):
+                    for y in range(0, self.model.columnCount()):
+                        row.append(self.model.record(x).value(y))
+
+                    data.append(row)
+                    row = []
+                
+                df = pd.DataFrame(data, columns = headers)
+                df.to_sql(self.db.tables()[t], connection, if_exists='replace', index=False)
+
+        connection.close()
 
     def filter_table(self):
         # Split into: column name and filter value
