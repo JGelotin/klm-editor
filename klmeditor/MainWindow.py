@@ -10,7 +10,7 @@ from PyQt5.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi("ui/MainWindow.ui", self)
+        uic.loadUi("ui/MainWindow.ui", self)        
         self.queryButton.setVisible(False)
         self.databaseTableComboBox.setVisible(False)
         self.show()
@@ -45,6 +45,14 @@ class MainWindow(QMainWindow):
         self.saveMenuAction.triggered.connect(self.save_file_dialog)
         self.exitMenuAction.triggered.connect(self.close)
 
+    def resource_path(relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+    
     def open_file_dialog(self):
         filename = QFileDialog.getOpenFileName(filter="CSV File (*.csv);;Database File (*.db)")
         split_filename = os.path.splitext(filename[0])
@@ -94,7 +102,6 @@ class MainWindow(QMainWindow):
 
                 if self.db.open():
                     self.model = QSqlTableModel()
-                    self.model.setEditStrategy()
 
                     # First table in database is open and displayed by default
                     statement = "SELECT * FROM " + self.db.tables()[0]
@@ -262,7 +269,7 @@ class MainWindow(QMainWindow):
                 row = []
             
             df = pd.DataFrame(data, columns = headers)
-            df.to_sql('table', connection, if_exists='replace', index=False)
+            df.to_sql(QtCore.QFileInfo(file_name).fileName(), connection, if_exists='replace', index=False)
 
         elif type(self.model) == type(QSqlTableModel()):
             for t in range(0, len(self.db.tables())):
