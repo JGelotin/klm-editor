@@ -166,16 +166,24 @@ class MainWindow(QMainWindow):
                 self.model.setItem(x, y, item)
 
     def save_file_dialog(self):
-        filename = QFileDialog.getSaveFileName(filter="CSV File (*.csv);;Database File (*.db)")
-        split_filename = os.path.splitext(filename[0])
+        if self.model != None:
+            filename = QFileDialog.getSaveFileName(filter="CSV File (*.csv);;Database File (*.db)")
+            split_filename = os.path.splitext(filename[0])
 
-        file_name = split_filename[0]
-        file_extension = split_filename[1]
+            file_name = split_filename[0]
+            file_extension = split_filename[1]
 
-        if file_extension == ".csv":
-            self.export_model_to_csv(file_name, file_extension)
-        elif file_extension == ".db":
-            self.export_model_to_db(file_name, file_extension)
+            if file_extension == ".csv":
+                self.export_model_to_csv(file_name, file_extension)
+            elif file_extension == ".db":
+                self.export_model_to_db(file_name, file_extension)
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Cannot save to file when no file is loaded.")
+            msg.setInformativeText("Please open file and try again.")
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def export_model_to_csv(self, file_name, file_extension):
         if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
@@ -296,13 +304,14 @@ class MainWindow(QMainWindow):
         connection.close()
 
     def filter_table(self):
-        # Split into: column name and filter value
-        split_filter = self.inputLine.text().split('=')
-        header_column = self.get_header_column(split_filter[0])
+        if type(self.model) == type(QtGui.QStandardItemModel(0,0)):
+            # Split into: column name and filter value
+            split_filter = self.inputLine.text().split('=')
+            header_column = self.get_header_column(split_filter[0])
 
-        if header_column != None:
-            self.filter_proxy_model.setFilterKeyColumn(header_column)
-            self.filter_proxy_model.setFilterRegExp(split_filter[1])
+            if header_column != None:
+                self.filter_proxy_model.setFilterKeyColumn(header_column)
+                self.filter_proxy_model.setFilterRegExp(split_filter[1])
 
     def get_header_column(self, header_label):
         # Returns index of column specified in the filter
